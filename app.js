@@ -95,7 +95,7 @@ app.post("/login", (req, res) => {
         if (err) { 
             console.log(`login failed ${err}`)
         }else{
-            passport.authenticate("local")(req, res, () => {
+            passport.authenticate("local")(req, res, () => {    //passport.authenticate("local") return a function
                 res.redirect("/secret"); 
             })
         }
