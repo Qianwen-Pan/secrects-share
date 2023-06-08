@@ -30,6 +30,23 @@ app.get("/register", (req, res) => {
     res.render("register");
 });
 
+app.post("/register", (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const newUser = new User({
+        email: username,
+        password: password
+    });
+
+    newUser.save()
+    .then(() => {
+        console.log("new user saved");
+        res.render("secrets");
+    })
+    .catch((e) => console.log(`user can't save because: ${e}`));
+
+});
 
 
 app.listen(3000, ()=>{
