@@ -3,7 +3,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-var md5 = require('md5');
+const bcrypt = require('bcrypt');
+
+const saltRounds = 10;
  
 const app = express();
 
@@ -38,25 +40,29 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
     const username = req.body.username;
-    const password = md5(req.body.password);
+    const password = req.body.password;
 
-    const newUser = new User({
-        email: username,
-        password: password
-    });
-
-    newUser.save()
-    .then(() => {
+    bcrypt.hash(password, saltRounds).then(function(hash) {
+        const newUser = new User({
+            email: username,
+            password: hash
+        });
+        newUser.save()
+        .then(() => {
         console.log("new user saved");
         res.render("secrets");
-    })
-    .catch((e) => console.log(`user can't save because: ${e}`));
+        })
+        .catch((e) => console.log(`user can't save because: ${e}`));
+    });
+    
 
 });
 
 app.post("/login", (req, res) => {
     const username = req.body.username;
-    const password = md5(req.body.password);
+    const password = req.body.password;
+
+    
 
     User.findOne({email: username})
     .then((foundUser) => {
@@ -64,14 +70,16 @@ app.post("/login", (req, res) => {
             console.log("user not exist");
             res.redirect("/login")
         }else{
-            if(foundUser.password === password){
-                console.log("login successful");
-                console.log(password);
-                res.render("secrets");
-            }else{
-                console.log("wrong password");
-                res.redirect("/login");
-            }   
+            bcrypt.compare(password, foundUser.password).then(function(result) {
+                if(result === true){
+                    console.log("login successful");
+                    console.log(password, foundUser.password);
+                    res.render("secrets");
+                }else{
+                    console.log("wrong password");
+                    res.redirect("/login");
+                }
+            });  
         }
     })
     .catch((e) => {
