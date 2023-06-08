@@ -48,6 +48,30 @@ app.post("/register", (req, res) => {
 
 });
 
+app.post("/login", (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    User.findOne({email: username})
+    .then((foundUser) => {
+        if(!foundUser){
+            console.log("user not exist");
+            res.redirect("/login")
+        }else{
+            if(foundUser.password === password){
+                console.log("login successful");
+                res.render("secrets");
+            }else{
+                console.log("wrong password");
+                res.redirect("/login");
+            }   
+        }
+    })
+    .catch((e) => {
+        console.log(`login fail : ${e}`)
+    })
+});
+
 
 app.listen(3000, ()=>{
     console.log("server runing");
