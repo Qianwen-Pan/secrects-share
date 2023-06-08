@@ -11,15 +11,17 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-const url = "mongodb+srv://qianwenpan:LpaU4z6r4Dxj4NjQ@cluster0.iyauopq.mongodb.net/secrectsDB";
+const db_name = process.env.DB_NAME;
+const db_password = process.env.DB_PASSWORD;
+const url = `mongodb+srv://${db_name}:${db_password}@cluster0.iyauopq.mongodb.net/secrectsDB`
 mongoose.connect(url,{useNewUrlParser: true}).then(() => console.log('MongoDB Connected...')).catch(err => console.log(err));
 
 const userSchema = new mongoose.Schema({
     email: String,
     password: String
 });
-var secret = "thismysecret";
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});
+
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ["password"]});
 
 const User = mongoose.model("User", userSchema);
 
